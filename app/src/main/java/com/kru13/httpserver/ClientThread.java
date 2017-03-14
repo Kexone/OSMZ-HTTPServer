@@ -19,6 +19,7 @@ import java.net.Socket;
 import java.util.concurrent.Semaphore;
 
 import android.os.Handler;
+import android.view.SurfaceHolder;
 
 /**
  * Created by Jakub on 21.02.2017.
@@ -32,12 +33,14 @@ public class ClientThread extends Thread {
     Semaphore semaphore;
     String fileName;
     CameraHandler cam;
+    SurfaceHolder sh;
 
-    public ClientThread(Socket s, android.os.Handler h, Semaphore sem, CameraHandler cam) {
+    public ClientThread(Socket s, android.os.Handler h, Semaphore sem, CameraHandler cam, SurfaceHolder sh) {
         this.s = s;
         this.h = h;
         this.semaphore = sem;
         this.cam = cam;
+        this.sh = sh;
     }
     public void close() {
         try {
@@ -83,17 +86,15 @@ public class ClientThread extends Thread {
                 Log.d("PICTURE",fileName.replace("/",""));
                 File f = new File( rootPath + fileName);
                 if(fileName.contains("camera") ) {
-                    cam.takeAPhoto();
+                    cam.setPreview(sh, out, s, o);
 
-                    out.write("HTTP/1.0 200 OK\n" +
-                            "Content-Type: text/html\n\n" +
-                            "<meta http-equiv=\"refresh\" content=\"5\"> \n" +
-                            "<html><body><h1> Cam feed </h1> <img src='osmz/camera.jpg' w='250px'> </body></html>\n");
+
                     //if(fileName.endsWith(".jpg")) out.write("Content-Type: image/jpg\n");
 
                 }
                 else if(f.exists()) {
                     out.write("HTTP/1.0 200 OK\n");
+                    out.write("Connection: close\n");
                     if(fileName.endsWith(".png")) out.write("Content-Type: image/png\n");
                     if(fileName.endsWith(".jpg")) out.write("Content-Type: image/jpg\n");
                     if(fileName.endsWith(".htm")) out.write("Content-Type: text/html\n");
@@ -110,17 +111,20 @@ public class ClientThread extends Thread {
                         o.write(buffer, 0, len );
                     }
                     out.flush();
+                    s.close();
                 }
                 else {
                     out.write("HTTP/1.0 404 Not Found\n" +
+                            "Connection: close\n" +
                             "Content-Type: text/html\n\n" +
                             "<!DOCTYPE html>\n<html><body><h1> sorry jako </h1></body></html>\n");
                     out.flush();
+                    s.close();
                 }
                 //out.write(result);
-                out.flush();
+                //out.flush();
 
-                s.close();
+              //  s.close();
                 Log.d("SERVER", "Socket Closed");
             }
         }

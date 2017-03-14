@@ -16,6 +16,7 @@ import android.os.Build;
 import android.os.Environment;
 import android.os.Handler;
 import android.util.Log;
+import android.view.SurfaceHolder;
 
 public class SocketServer extends Thread {
 
@@ -26,10 +27,12 @@ public class SocketServer extends Thread {
 	public final int port = 12345;
 	boolean bRunning;
 	CameraHandler cam;
+	SurfaceHolder sh;
 
-	public SocketServer(Handler h, CameraHandler cam) {
+	public SocketServer(Handler h, CameraHandler cam, SurfaceHolder sh) {
 		this.h = h;
 		this.cam = cam;
+		this.sh = sh;
 	}
 	public void close() {
 		try {
@@ -53,7 +56,7 @@ public class SocketServer extends Thread {
 				Log.d("SERVER", "Socket Accepted");
 				if( semaphore.tryAcquire()) {
 					Log.d("AVAILABLE", String.valueOf(semaphore.availablePermits()));
-					new ClientThread(s,h, semaphore, cam).start();
+					new ClientThread(s,h, semaphore, cam, sh).start();
 				}
 				else {
 					OutputStream o = s.getOutputStream();

@@ -8,7 +8,8 @@
     android:paddingLeft="@dimen/activity_horizontal_margin"
     android:paddingRight="@dimen/activity_horizontal_margin"
     android:paddingTop="@dimen/activity_vertical_margin"
-    tools:context=".HttpServerActivity" >
+    tools:context=".HttpServerActivity"
+    android:weightSum="1">
 
     <Button
         android:id="@+id/button1"
@@ -24,7 +25,7 @@
 
     <ScrollView
         android:layout_width="match_parent"
-        android:layout_height="match_parent"
+        android:layout_height="232dp"
         android:id="@+id/scrollView">
 
         <LinearLayout
@@ -40,5 +41,11 @@
                 android:id="@+id/textView" />
         </LinearLayout>
     </ScrollView>
+
+    <SurfaceView
+        android:id="@+id/surfaceView"
+        android:layout_width="match_parent"
+        android:layout_height="135dp"
+        android:layout_weight="0.49" />
 
 </LinearLayout>

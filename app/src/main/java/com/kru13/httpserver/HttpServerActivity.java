@@ -14,6 +14,8 @@ import android.os.Message;
 import android.provider.CalendarContract;
 import android.util.Log;
 import android.view.Menu;
+import android.view.SurfaceHolder;
+import android.view.SurfaceView;
 import android.view.View;
 import android.view.View.OnClickListener;
 import android.widget.Button;
@@ -31,6 +33,8 @@ public class HttpServerActivity extends Activity implements OnClickListener{
 	private ScrollView scrlView;
 	private LinearLayout ll;
 	private CameraHandler camera;
+	public SurfaceView sv;
+	public SurfaceHolder sh;
 	Button btn1;
 
 	Handler h = new Handler() {
@@ -47,6 +51,7 @@ public class HttpServerActivity extends Activity implements OnClickListener{
 			ll.setBackgroundColor(Color.CYAN);
 			ll.addView(tt);
 			//scrlView.addView(txtView);
+
 		}
 	};
 
@@ -62,6 +67,8 @@ public class HttpServerActivity extends Activity implements OnClickListener{
 		btn2.setOnClickListener(this);
 		txtView = (TextView) findViewById(R.id.textView);
 		ll = (LinearLayout) findViewById(R.id.linearLayoutInScroll);
+		sv = (SurfaceView) findViewById(R.id.surfaceView);
+		sh = sv.getHolder();
 		//Log.d("FIRST", System.getenv("EXTERNAL_STORAGE"));
 		//Log.d("SECOND", System.getenv("SECONDARY_STORAGE"));
 	}
@@ -85,7 +92,7 @@ public class HttpServerActivity extends Activity implements OnClickListener{
 			}
 			camera = new CameraHandler(0);
 			Log.d("CAMERA", camera.toString());
-			s = new SocketServer(h, camera);
+			s = new SocketServer(h, camera, sh);
 			s.start();
 			Toast.makeText(this, "Server running", Toast.LENGTH_SHORT).show();
 		}
@@ -106,7 +113,7 @@ public class HttpServerActivity extends Activity implements OnClickListener{
 		if (requestCode == 88 && grantResults[0] == PackageManager.PERMISSION_GRANTED && grantResults[1] == PackageManager.PERMISSION_GRANTED){
 			camera = new CameraHandler(0);
 
-			s = new SocketServer(h, camera);
+			s = new SocketServer(h, camera,sh);
 			s.start();
 
 			Toast.makeText(this, "Server running", Toast.LENGTH_SHORT).show();
