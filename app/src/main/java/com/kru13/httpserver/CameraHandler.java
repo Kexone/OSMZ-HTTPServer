@@ -115,7 +115,7 @@ public class CameraHandler {
                     out.write("--boundary\r\n");
                     out.flush();
                 }
-                sleep(1000);
+                sleep(100);
             }
     } catch (IOException e) {
             e.printStackTrace();
