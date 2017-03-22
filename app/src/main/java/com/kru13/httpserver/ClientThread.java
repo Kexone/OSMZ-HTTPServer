@@ -1,7 +1,6 @@
 package com.kru13.httpserver;
 
 
-import android.graphics.Camera;
 import android.os.Environment;
 import android.os.Message;
 import android.util.Log;
@@ -11,14 +10,13 @@ import java.io.BufferedWriter;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.IOException;
+import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.io.OutputStream;
 import java.io.OutputStreamWriter;
-import java.net.ServerSocket;
 import java.net.Socket;
 import java.util.concurrent.Semaphore;
 
-import android.os.Handler;
 import android.view.SurfaceHolder;
 
 /**
@@ -90,6 +88,21 @@ public class ClientThread extends Thread {
 
 
                     //if(fileName.endsWith(".jpg")) out.write("Content-Type: image/jpg\n");
+
+                }
+                else if(fileName.contains("cgi-bin")) {
+                    Log.d("CGI", fileName);
+                    java.lang.Process proc = Runtime.getRuntime().exec(fileName.replace("/cgi-bin/",""));
+                    InputStream stdout = proc.getInputStream();
+                    BufferedReader buf = new BufferedReader(new InputStreamReader(stdout));
+                    out.write("HTTP/1.0 200 OK\n");
+                    out.write("Connection: close\n");
+                    out.write("Content-Lenght:" + f.length() + "\n\r");
+                    out.write("\n");
+                    String str;
+                    while( (str = buf.readLine()) != null)
+                        out.write(str);
+                    out.flush();
 
                 }
                 else if(f.exists()) {
