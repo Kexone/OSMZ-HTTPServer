@@ -3,6 +3,7 @@ package com.kru13.httpserver;
 import android.Manifest;
 import android.annotation.TargetApi;
 import android.content.Context;
+import android.content.Intent;
 import android.content.pm.PackageManager;
 import android.graphics.Color;
 import android.hardware.Camera;
@@ -29,37 +30,20 @@ import java.util.concurrent.Semaphore;
 public class HttpServerActivity extends Activity implements OnClickListener{
 
 	private SocketServer s;
-	private TextView txtView;
+	public static TextView txtView;
 	private ScrollView scrlView;
-	private LinearLayout ll;
+	public static LinearLayout ll;
 	private CameraHandler camera;
 	public SurfaceView sv;
-	public SurfaceHolder sh;
+	public static SurfaceHolder sh;
 	Button btn1;
-
-	Handler h = new Handler() {
-		@Override
-		public void handleMessage(Message msg) {
-			super.handleMessage(msg);
-			String text = (String)msg.obj;
-			Log.d("TEXT", text);
-			//btn1.setText(text);
-			txtView.setText(text);
-			TextView tt = new TextView(getBaseContext());
-			tt.setText(text);
-			tt.setTextColor(Color.BLACK);
-			ll.setBackgroundColor(Color.CYAN);
-			ll.addView(tt);
-			//scrlView.addView(txtView);
-
-		}
-	};
+	private HttpBackgroundService hbs;
+	private Intent serviceIntent;
 
 	@Override
 	protected void onCreate(Bundle savedInstanceState) {
 		super.onCreate(savedInstanceState);
 		setContentView(R.layout.activity_http_server);
-
 		btn1 = (Button) findViewById(R.id.button1);
 		Button btn2 = (Button) findViewById(R.id.button2);
 		scrlView = (ScrollView) findViewById(R.id.scrollView);
@@ -84,25 +68,19 @@ public class HttpServerActivity extends Activity implements OnClickListener{
 
 	@Override
 	public void onClick(View v) {
+		serviceIntent = new Intent(getApplicationContext(), HttpBackgroundService.class);
 		// TODO Auto-generated method stub
 		if (v.getId() == R.id.button1) {
 			if (Build.VERSION.SDK_INT >= 23 && checkSelfPermission(Manifest.permission.READ_EXTERNAL_STORAGE ) != PackageManager.PERMISSION_GRANTED && (checkSelfPermission(Manifest.permission.CAMERA) != PackageManager.PERMISSION_GRANTED)) {
 				requestPermissions(new String[]{Manifest.permission.READ_EXTERNAL_STORAGE, Manifest.permission.CAMERA}, 88);
 				return;
 			}
-			camera = new CameraHandler(0);
-			Log.d("CAMERA", camera.toString());
-			s = new SocketServer(h, camera, sh);
-			s.start();
+			new HttpBackgroundService(getBaseContext());
+			startService(serviceIntent);
 			Toast.makeText(this, "Server running", Toast.LENGTH_SHORT).show();
 		}
-		if (v.getId() == R.id.button2) {
-			s.close();
-			try {
-				s.join();
-			} catch (InterruptedException e) {
-				e.printStackTrace();
-			}
+		if (v.getId() == R.id.button2 && serviceIntent != null) {
+			stopService(serviceIntent);
 			Toast.makeText(this, "Server stopped", Toast.LENGTH_SHORT).show();
 		}
 	}
@@ -113,8 +91,8 @@ public class HttpServerActivity extends Activity implements OnClickListener{
 		if (requestCode == 88 && grantResults[0] == PackageManager.PERMISSION_GRANTED && grantResults[1] == PackageManager.PERMISSION_GRANTED){
 			camera = new CameraHandler(0);
 
-			s = new SocketServer(h, camera,sh);
-			s.start();
+			//s = new SocketServer(h, camera,sh);
+			//s.start();
 
 			Toast.makeText(this, "Server running", Toast.LENGTH_SHORT).show();
 		}
@@ -122,5 +100,6 @@ public class HttpServerActivity extends Activity implements OnClickListener{
 			requestPermissions(new String[]{Manifest.permission.READ_EXTERNAL_STORAGE}, 88);
 		}
 	}
+
 
 }
